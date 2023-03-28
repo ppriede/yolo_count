@@ -1,13 +1,25 @@
-import cv2
-
+#import cv2
+import os
 from ultralytics import YOLO
 import supervision as sv
 import numpy as np
 
+# Carpeta de trabajo
+HOME = os.getcwd()
+# Video para analizar
+SOURCE_VIDEO_PATH = f"{HOME}/../seg1_corto.mp4"
+# Video resultado final
+TARGET_VIDEO_PATH = f"{HOME}/seg1_corto_yolo_count.mp4"
 
+# Linea de deteccion
 LINE_START = sv.Point(122, 518)
 LINE_END = sv.Point(516, 487)
 
+# Informacion de video original
+video_info = sv.VideoInfo.from_video_path(SOURCE_VIDEO_PATH)
+print(video_info)
+duracion = video_info.total_frames/video_info.fps
+print("Duracion:",duracion,"segundos")
 
 def main():
     line_counter = sv.LineZone(
@@ -25,39 +37,27 @@ def main():
 
     model = YOLO("yolov8n.pt")
     for result in model.track(
-        source="../seg1.mp4",
-        save=True,
-        save_txt=True,
-        save_conf=True,
-        conf=0.3):
-        
+        source=SOURCE_VIDEO_PATH,
+        save=False,
+        save_txt=False,
+        save_conf=False,
+        conf=0.5,
+        device=0):
         frame = result.orig_img
         detections = sv.Detections.from_yolov8(result)
-
         if result.boxes.id is not None:
             detections.tracker_id = result.boxes.id.cpu().numpy().astype(int)
-        
-        detections = detections[(detections.class_id != 60) & (detections.class_id != 0)]
-
         labels = [
             f"{tracker_id} {model.model.names[class_id]} {confidence:0.2f}"
             for _, confidence, class_id, tracker_id
             in detections
         ]
-
         frame = box_annotator.annotate(
             scene=frame, 
             detections=detections,
-            labels=labels
-        )
-
+            labels=labels)
         line_counter.trigger(detections=detections)
         line_annotator.annotate(frame=frame, line_counter=line_counter)
-
-        # cv2.imshow("yolov8", frame)
-
-        # if (cv2.waitKey(30) == 27):
-        #     break
 
 
 if __name__ == "__main__":

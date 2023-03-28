@@ -46,6 +46,41 @@ yolo track model="yolov8x.pt" source="../seg1_corto.mp4" conf=0.5 save=True save
 ```
 Todo en orden, continuamos con Python
 
+## 💻 Prueba rapida Windows 10
+Al parecer hay problemas con la libreria lap en Windows 10 y Python 3.9
+Mejor hacer un entorno virtual en python 3.8
+
+```sh
+D:
+cd ENV
+conda create -n venv_yolo_p38 python=3.8
+conda activate venv_yolo_p38
+pip install ultralytics==8.0.51
+pip install supervision==0.3.0
+yolo version
+# 8.0.51
+pip show supervision
+# Name: supervision
+# Version: 0.3.0
+# Summary: A set of easy-to-use utils that will come in handy in any Computer Vision project
+# Home-page: https://github.com/roboflow/supervision
+# Author: Piotr Skalski
+# Author-email: piotr.skalski92@gmail.com
+# License: MIT
+# Location: d:\ppriede\anaconda3\envs\venv_yolo_p38\lib\site-packages
+# Requires: matplotlib, numpy, opencv-python
+# Required-by:
+```
+
+Pruebas con video
+
+```sh
+yolo track model="yolov8n.pt" source="seg1_corto.mp4"
+```
+
+Hay problemas en Windows10 (Workstation), no esta funcionando
+
+
 # Python (SDK)
 
 ## main.py 🐍
