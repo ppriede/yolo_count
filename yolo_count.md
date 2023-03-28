@@ -70,6 +70,9 @@ pip show supervision
 # Location: d:\ppriede\anaconda3\envs\venv_yolo_p38\lib\site-packages
 # Requires: matplotlib, numpy, opencv-python
 # Required-by:
+
+#Para cerrar venv
+#conda deactivate
 ```
 
 Pruebas con video
@@ -80,6 +83,69 @@ yolo track model="yolov8n.pt" source="seg1_corto.mp4"
 
 Hay problemas en Windows10 (Workstation), no esta funcionando
 
+
+
+## 💻 Prueba rapida Windows 10 (intento 2)
+Al parecer hay problemas con la libreria lap en Windows 10 y Python 3.9
+Mejor hacer un entorno virtual en python 3.8
+
+```sh
+D:
+cd ENV
+conda create -n venv_yolo
+conda activate venv_yolo
+pip install ultralytics
+pip install supervision
+yolo version
+# 8.0.51
+pip show supervision
+# Name: supervision
+# Version: 0.3.0
+# Summary: A set of easy-to-use utils that will come in handy in any Computer Vision project
+# Home-page: https://github.com/roboflow/supervision
+# Author: Piotr Skalski
+# Author-email: piotr.skalski92@gmail.com
+# License: MIT
+# Location: d:\ppriede\anaconda3\lib\site-packages
+# Requires: matplotlib, numpy, opencv-python
+# Required-by:
+
+#Para cerrar venv
+#conda deactivate
+```
+
+Pruebas con video
+
+```sh
+yolo track model="yolov8n.pt" source="seg1_corto.mp4"
+```
+
+Falla igual
+hay un problema con lap, no instala, ni de pip ni de github
+```sh
+pip install lap
+pip install git+git://github.com/gatagat/lap.git
+```
+
+Aqui puede existir un parche
+https://github.com/ultralytics/ultralytics/issues/1328
+```python
+def linear_assignment(cost_matrix, thresh):
+    if cost_matrix.size == 0:
+        return np.empty((0, 2), dtype=int), tuple(range(cost_matrix.shape[0])), tuple(range(cost_matrix.shape[1]))
+    matches, unmatched_a, unmatched_b = [], [], []
+
+    cost_matrix[cost_matrix > thresh] = thresh + 1e-5
+    indices = linear_sum_assignment(cost_matrix)
+    for row, col in zip(*indices):
+        if cost_matrix[row, col] > thresh:
+            unmatched_a.append(row)
+            unmatched_b.append(col)
+        else:
+            matches.append((row, col))
+
+    return matches, unmatched_a, unmatched_b
+```
 
 # Python (SDK)
 
