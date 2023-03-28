@@ -5,9 +5,9 @@ import numpy as np
 # Carpeta de trabajo
 HOME = os.getcwd()
 # Video para analizar
-SOURCE_VIDEO_PATH = f"{HOME}/../seg1_corto.mp4"
+SOURCE_VIDEO_PATH = f"{HOME}/../seg3.mkv"
 # Video resultado final
-TARGET_VIDEO_PATH = f"{HOME}/seg1_yolo_count.mp4"
+TARGET_VIDEO_PATH = f"{HOME}/seg3_yolo_count.mkv"
 # Linea de deteccion
 LINE_START = sv.Point(122, 518)
 LINE_END = sv.Point(516, 487)
