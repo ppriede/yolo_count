@@ -147,6 +147,77 @@ def linear_assignment(cost_matrix, thresh):
     return matches, unmatched_a, unmatched_b
 ```
 
+
+# DEV de yolo_count
+Montado en Ubuntu 22.04.2 LTS en WSL desde Windows 10
+
+Varias cosas (cuda, nvidia), ya fueron instaladas de acuerdo a guias para nvidia-docker
+
+Por simplicidad, finalmente se ocupa directamente WSL en Windows 10
+
+Para acceder a los archivos, la ruta es ""
+
+
+# Instalacion de librerias base
+````sh
+virtualenv venv_yolov
+source venv_yolov/bin/activate
+pip install ultralytics
+pip install supervision
+````
+
+## Versiones
+```sh
+yolo version
+# 8.0.58
+pip show supervision
+# Name: supervision
+# Version: 0.3.2
+# Summary: A set of easy-to-use utils that will come in handy in any Computer Vision project
+# Home-page: https://github.com/roboflow/supervision
+# Author: Piotr Skalski
+# Author-email: piotr.skalski92@gmail.com
+# License: MIT
+# Location: /home/ppriede/DEV/venv_yolov/lib/python3.10/site-packages
+# Requires: matplotlib, numpy, opencv-python
+# Required-by:
+```
+
+## 💻 Prueba rapida
+
+```sh
+yolo track model="yolov8n.pt" source="seg1_corto.mp4"
+```
+
+### Algunas fallas
+Hay que agregar cuda al PATH en WSL
+https://discuss.pytorch.org/t/libcudnn-cnn-infer-so-8-library-can-not-found/164661
+
+````sh
+# Verificamos que existe ese path
+ldconfig -p | grep cuda
+# Agregamos
+export LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH
+````
+
+## 💻 Prueba rapida 2
+Mas compleja, para guardar
+
+```sh
+yolo track model="yolov8n.pt" source="seg1_corto.mp4" conf=0.5 save=True save_txt=True save_conf=True save_crop=True classes=[2,3,5,6,7]
+```
+
+TODO EN ORDEN!
+
+## Prueba 2 horas
+Archivo Valdivia
+
+Guardamos Video, texto, track con ID e intervalos de confianza, fotos de captura, todas las clases
+
+```sh
+yolo track model="yolov8n.pt" source="PMC01_09_a_11.mkv" conf=0.25 save=True save_txt=True save_conf=True save_crop=True device=0
+```
+
 # Python (SDK)
 
 ## main.py 🐍
@@ -157,4 +228,3 @@ Punto 1 (122, 518)
 Punto 2: (516, 487)
 
 No esta pescando bien la primera parte, seguimos despues.
-
