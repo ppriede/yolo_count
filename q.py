@@ -1,7 +1,7 @@
 import os
 import argparse
 from ultralytics import YOLO
-import supervision as sv
+import supervision_MOD as sv
 import numpy as np
 
 
@@ -19,7 +19,7 @@ HOME = os.getcwd()
 # exit()
 
 # Video para analizar
-SOURCE_VIDEO_PATH = f"{HOME}/../PMC01_09_a_11.mkv"
+SOURCE_VIDEO_PATH = f"{HOME}/../seg1_3_autos.mp4"
 # TARGET_VIDEO_PATH = cfg.source if cfg.source is not None else TARGET_VIDEO_PATH
 # Video resultado final
 TARGET_VIDEO_PATH = f"{HOME}/seg1_corto_stream_T_yolo_count.mp4"
@@ -50,22 +50,23 @@ def main():
     i=0 # Cuadro inicial
     # Si calculamos el tiempo, obtenemos el tiempo del cuadro
     # i/fps
-    file_object = open(f"{HOME}/conteo_largo.txt", 'a')
+    #file_object = open(f"{HOME}/conteo_largo.txt", 'a')
+    con = 0 # ultimo estado de conteo
     for result in model.track(
         source=SOURCE_VIDEO_PATH, # Ruta de archivo a leer, si es 0 es webcam o camara conectada
-        save=False, # Guarda video
+        save=True, # Guarda video
         save_txt=True, # Guarda la informacion del cuadro donde se detecto algo
         save_conf=True, # Guarda el intervalo de confianza junto con los datos
         save_crop=False, # Guarda una imagen de lo detectado
-        hide_labels=True, # Oculta la etiqueta de la deteccion
-        hide_conf=True, # Oculta el intervalo de confianza en la imagen
+        hide_labels=False, # Oculta la etiqueta de la deteccion
+        hide_conf=False, # Oculta el intervalo de confianza en la imagen
         visualize=False, # No se
         boxes=False, # Muestra las cajas alrededor del objeto
         show=False, # Si puede, muestra informacion
         conf=0.25, # Intervalo de confianza para la deteccion
         device=0, # Usamos device=0 (GPU)
         classes=[2,3,5,6,7], # Solo identificamos estas clases (coco.txt con lista completa)
-        verbose=False, #Esto genera mas informacion en CLI
+        verbose=True, #Esto genera mas informacion en CLI
         stream=True # Esto, al parecer, entrega los datos en cada deteccion... veamos si lo entiendo bien
         ):
         tiempo =i/video_info.fps
@@ -83,8 +84,11 @@ def main():
             detections=detections,
             labels=labels)
         line_counter.trigger(detections=detections)
-        print("IN: ",line_counter.in_count, "i: ",i,"Tiempo: ",tiempo,"segundos")
-        
+        #print("IN: ",line_counter.in_count, "i: ",i,"Tiempo: ",tiempo,"segundos")
+        if (line_counter.in_count != con):
+            print("Paso algo")
+            print("IN: ",line_counter.in_count, "i: ",i,"Tiempo: ",tiempo,"segundos","Clase:",labels)
+            con = line_counter.in_count
         # file_object.write(str(line_counter.in_count))
         # file_object.write(";")
         # file_object.write(str(i))
