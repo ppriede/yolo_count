@@ -19,7 +19,7 @@ HOME = os.getcwd()
 # exit()
 
 # Video para analizar
-SOURCE_VIDEO_PATH = f"{HOME}/../PMC01_09_a_11.mkv"
+SOURCE_VIDEO_PATH = f"{HOME}/../seg1_corto.mp4"
 # TARGET_VIDEO_PATH = cfg.source if cfg.source is not None else TARGET_VIDEO_PATH
 # Video resultado final
 TARGET_VIDEO_PATH = f"{HOME}/seg1_corto_stream_T_yolo_count.mp4"
@@ -50,52 +50,44 @@ def main():
     i=0 # Cuadro inicial
     # Si calculamos el tiempo, obtenemos el tiempo del cuadro
     # i/fps
-    file_object = open(f"{HOME}/conteo_largo.txt", 'a')
-    for result in model.track(
-        source=SOURCE_VIDEO_PATH, # Ruta de archivo a leer, si es 0 es webcam o camara conectada
-        save=False, # Guarda video
-        save_txt=True, # Guarda la informacion del cuadro donde se detecto algo
-        save_conf=True, # Guarda el intervalo de confianza junto con los datos
-        save_crop=False, # Guarda una imagen de lo detectado
-        hide_labels=True, # Oculta la etiqueta de la deteccion
-        hide_conf=True, # Oculta el intervalo de confianza en la imagen
-        visualize=False, # No se
-        boxes=False, # Muestra las cajas alrededor del objeto
-        show=False, # Si puede, muestra informacion
-        conf=0.25, # Intervalo de confianza para la deteccion
-        device=0, # Usamos device=0 (GPU)
-        classes=[2,3,5,6,7], # Solo identificamos estas clases (coco.txt con lista completa)
-        verbose=False, #Esto genera mas informacion en CLI
-        stream=True # Esto, al parecer, entrega los datos en cada deteccion... veamos si lo entiendo bien
-        ):
-        tiempo =i/video_info.fps
-        frame = result.orig_img
-        detections = sv.Detections.from_yolov8(result)
-        if result.boxes.id is not None:
-            detections.tracker_id = result.boxes.id.cpu().numpy().astype(int)
-        labels = [
-            f"{tracker_id} {model.model.names[class_id]} {class_id} {confidence:0.2f}"
-            for _, confidence, class_id, tracker_id
-            in detections
-        ]
-        frame = box_annotator.annotate(
-            scene=frame, 
-            detections=detections,
-            labels=labels)
-        line_counter.trigger(detections=detections)
-        print("IN: ",line_counter.in_count, "i: ",i,"Tiempo: ",tiempo,"segundos")
-        file_object.write(str(line_counter.in_count))
-        file_object.write(";")
-        file_object.write(str(i))
-        file_object.write(";")
-        file_object.write(str(tiempo))
-        file_object.write(";")
-        file_object.write(str(labels))
-        file_object.write(";")
-        file_object.write(str(detections))
-        file_object.write("\n")
-        line_annotator.annotate(frame=frame, line_counter=line_counter)
-        i+=1
+    with sv.VideoSink(TARGET_VIDEO_PATH, video_info) as sink:
+        for result in model.track(
+            source=SOURCE_VIDEO_PATH, # Ruta de archivo a leer, si es 0 es webcam o camara conectada
+            save=False, # Guarda video
+            save_txt=False, # Guarda la informacion del cuadro donde se detecto algo
+            save_conf=False, # Guarda el intervalo de confianza junto con los datos
+            save_crop=False, # Guarda una imagen de lo detectado
+            hide_labels=True, # Oculta la etiqueta de la deteccion
+            hide_conf=True, # Oculta el intervalo de confianza en la imagen
+            visualize=False, # No se
+            boxes=False, # Muestra las cajas alrededor del objeto
+            show=False, # Si puede, muestra informacion
+            conf=0.25, # Intervalo de confianza para la deteccion
+            device=0, # Usamos device=0 (GPU)
+            classes=[2,3,5,6,7], # Solo identificamos estas clases (coco.txt con lista completa)
+            verbose=False, #Esto genera mas informacion en CLI
+            stream=True # Esto, al parecer, entrega los datos en cada deteccion... veamos si lo entiendo bien
+            ):
+            tiempo =i/video_info.fps
+            frame = result.orig_img
+            detections = sv.Detections.from_yolov8(result)
+            if result.boxes.id is not None:
+                detections.tracker_id = result.boxes.id.cpu().numpy().astype(int)
+            labels = [
+                f"{tracker_id} {model.model.names[class_id]} {class_id} {confidence:0.2f}"
+                for _, confidence, class_id, tracker_id
+                in detections
+            ]
+            frame = box_annotator.annotate(
+                scene=frame, 
+                detections=detections,
+                labels=labels)
+            line_counter.trigger(detections=detections)
+            print("IN: ",line_counter.in_count, "i: ",i,"Tiempo: ",tiempo,"segundos")
+            line_annotator.annotate(frame=frame, line_counter=line_counter)
+            sink.write_frame(frame=frame)
+            i+=1
+
 
 if __name__ == "__main__":
     main()
